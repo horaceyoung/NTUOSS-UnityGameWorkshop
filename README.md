@@ -1,3 +1,5 @@
+
+
 # NTUOSS Unity Workshop
 
 ##### *made with love by [Yong Hao](https://github.com/HORACEYOUNG) for NTU Open Source Society*
@@ -105,7 +107,7 @@ The Unity Editor features multiple tools that enable rapid editing and iteration
 
 > **Unity Asset Packages** and items on the Unity **Asset Store** are supplied in packages, which are **collections of files and data from Unity Projects**, or elements of Projects, which **are compressed and stored in one file**, similar to zip files. Like zip files.
 
-​	For this Tutorial, we will be using an online package called [MarioCloneAssets.unitypackage](https://github.com/HORACEYOUNG/NTUOSS-UnityWorkshop/blob/master/MarioCloneAssets.unitypackage) under the root directory of the [workshop repository](https://github.com/HORACEYOUNG/NTUOSS-UnityWorkshop).
+​	For this Workshop, we will be using an online package called [MarioCloneAssets.unitypackage](https://github.com/HORACEYOUNG/NTUOSS-UnityWorkshop/blob/master/MarioCloneAssets.unitypackage) under the root directory of the [workshop repository](https://github.com/HORACEYOUNG/NTUOSS-UnityWorkshop).
 
 ![](Images/2.a.AssetPackage.png)
 
@@ -115,3 +117,70 @@ There are to ways to import an asset package to your project:
 
 1. From the top menu bar, choose Assets >> Import Package >> Custom Package
 ![2.1.a.ImportAssetPackage](Images/2.1.a.ImportAssetPackage.png)
+
+Find the directory of [MarioCloneAssets.unitypackage](https://github.com/HORACEYOUNG/NTUOSS-UnityWorkshop/blob/master/MarioCloneAssets.unitypackage) and double click it, a window below is about to show up:
+
+![2.1.b.ImportAssetPackage](Images/2.1.b.ImportAssetPackage.png)
+
+​	From the above we can see that we could choose the assets that we want to import to out project. We select all and click import because we are eventually going to need them all.
+
+![2.1.c.FinishedImport](Images/2.1.c.FinishedImport.png)
+
+![2.1.d.FinishedImport](Images/2.1.d.FinishedImport.png)
+
+​	Upon finishing, you should be able to see a few new folders appear at the bottom under the root “Asset”. This block is where we will be managing all our assets.
+### Task2.2. Set Up the Scene for Our Game
+### [UnityConcept: Scene](https://docs.unity3d.com/Manual/CreatingScenes.html)
+> **Scenes** contain the environments and menus of your game. Think of each unique **Scene** file as a unique level. 
+>
+> In each **Scene**, you place your environments, obstacles, and decorations, essentially designing and building your game in pieces.
+
+​	Now it’s time for us to add our models and elements to populate our scene, a scene is like a stage in the theater for GameObjects to perform their functionalities.
+
+How exactly are we going to introduce our main character - - Super Mario to our scene? Now navigate to the Assets >> Resources >> Prefabs and drag the prefab you wanted to the scene.
+### [UnityConcept: Prefab](https://docs.unity3d.com/Manual/Prefabs.html)
+> The **prefab** acts as a template from which you can create new object instances in the scene. 
+>
+> Any edits made to a **prefab asset** are immediately reflected in all instances produced from it but you can also override components and settings for each instance individually.
+
+By dragging the prefab into the scene, a few changes can be observed.
+
+First, under the hierarchy >> the current scene, a GameObject has been created. 
+
+Dragging a prefab into the scene is a way to create game objects. There are many other ways to do it, I’ll leave it to you to explore.
+
+![2.2.a.CreateGameObject](Images/2.2.a.CreateGameObject.png)
+
+Secondly, when you click on the newly created Player GameObject, the inspector on the right-hand side begin to display the information about this GameObject.
+
+In Unity, every object is a GameObject. They possess certain properties like position, scale, rotation, lighting or color, and containing other components, for example, a rigidBody to apply force to, or a collider to detect collision.
+
+There are many components that a GameObject can possess, for now our main focus will be on the component named “Transform”.
+
+### [UnityConcept: Transform](https://docs.unity3d.com/Manual/class-Transform.html)
+> The Transform component determines the Position, Rotation, and Scale of each object in the scene. 
+>
+> Every GameObject has a Transform.
+
+![2.2.b.Transform](Images/2.2.b.Transform.png)
+
+The position of transform indicates the relative position the object is in regard of the scene, we could change the values by manipulating the corresponding x, y, and z value of the position (For a 2D project we only care about x and y, ignoring the z-axis).
+
+ Now please drag the following prefabs to the scene and set them to the corresponding location given below:
+
+1. Main Camera (0, 0, 0)
+2. Player (-3, -2, 0)
+3. Ground Long (-4.5, -4.5, 0)
+4. Two Bound: (-5.5, -4.5 , 0) and (50.5, -4.5, 0)
+5. A few other decorations which I will address shortly.
+
+If the scene is set properly, the scene view should be like this:
+
+![2.2.c.SceneSetUp](Images/2.2.c.SceneSetUp.png)
+
+Now we’re all set and comes the most exciting part: coding!
+
+---
+
+## Task 3. Write Scripts for Player Motion
+
