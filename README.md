@@ -184,3 +184,26 @@ Now we’re all set and comes the most exciting part: coding!
 
 ## Task 3. Write Scripts for Player Motion
 
+Now let’s get our hands on the most important concept in Unity: ***Script***
+
+The behavior of **GameObjects**
+ is controlled by the **Components**
+ that are attached to them. Although Unity’s built-in Components can be very versatile, you will soon find you need to go beyond what they can provide to implement your own gameplay features. 
+
+### [UnityConcept: Scripts](https://docs.unity3d.com/Manual/CreatingAndUsingScripts.html)
+
+> Unity allows you to create your own Components using scripts. These allow you to trigger game events, modify Component properties over time and respond to user input in any way you like.
+>
+> Unity supports the C# programming language natively. C# (pronounced C-sharp) is an industry-standard language similar to Java or C++.
+
+For convenience, let’s create a new folder called “Scripts” and create the scripts we will need for the following session: (We'll address them in order)
+
+1. Player
+2. CameraFollow
+3. EnemyAI
+4. QuestionBlock
+5. Castle
+
+If you are doing properly, your script folder should be like this:
+
+![3.a.CreateScripts](Images/3.a.CreateScripts.png)
