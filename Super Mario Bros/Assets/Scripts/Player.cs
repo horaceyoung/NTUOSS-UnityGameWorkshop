@@ -14,9 +14,10 @@ public class Player : MonoBehaviour
         walking,
         jumping
     }
+
     PlayerState playerState; // Player state to keep track of
 
-    private Rigidbody2D playerRb;       //Store a reference to the Rigidbody2D component required to use 2D Physics.
+    private Rigidbody2D playerRb;  //Store a reference to the Rigidbody2D component required to use 2D Physics.
 
     // Use this for initialization
     void Start()
@@ -37,7 +38,6 @@ public class Player : MonoBehaviour
 
         Vector3 scale = transform.localScale; // Reference Player's scale
 
-
         CheckPlayerInput(); // Check the Player's input here
 
         if (walk)
@@ -49,13 +49,19 @@ public class Player : MonoBehaviour
             if (walkLeft)
             {
                 playerRb.AddForce(Vector2.left * velocity.x); // Apply the force to the player
-                scale.x = -1;
+                scale.x = -1; // Change the direction the player is facing
             }
             else if (walkRight)
             {
                 playerRb.AddForce(Vector2.right * velocity.x);
                 scale.x = 1;
             }
+
+        }
+
+        if (jump)
+        {
+            playerRb.AddForce(Vector2.up * velocity.y);
         }
 
         transform.localScale = scale; // Update Player's Tranform.scale Here
@@ -63,17 +69,17 @@ public class Player : MonoBehaviour
 
     void CheckPlayerInput()
     {
-        
+        // Declare three bools to check the state of keyboard input
         bool input_left = Input.GetKey(KeyCode.LeftArrow);
         bool input_right = Input.GetKey(KeyCode.RightArrow);
         bool input_space = Input.GetKeyDown(KeyCode.Space);
 
-        walk = input_left || input_right;
+        walk = input_left || input_right; // The player is walking when it's either walking left/right
 
         walkLeft = input_left && !input_right;
 
         walkRight = !input_left && input_right;
 
-        jump = input_space;
+        jump = input_space; // The player will jump is space is pressed
     }
 }
