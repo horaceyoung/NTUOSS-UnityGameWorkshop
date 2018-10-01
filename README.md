@@ -168,7 +168,7 @@ The position of transform indicates the relative position the object is in regar
 
  Now please drag the following prefabs to the scene and set them to the corresponding location given below:
 
-1. Main Camera (0, 0, 0)
+1. Main Camera (0, 0, -30)
 2. Player (-3, -2, 0)
 3. Ground Long (-4.5, -4.5, 0)
 4. Two Bound: (-5.5, -4.5 , 0) and (50.5, -4.5, 0)
@@ -207,3 +207,54 @@ For convenience, let’s create a new folder called “Scripts” and create the
 If you are doing properly, your script folder should be like this:
 
 ![3.a.CreateScripts](Images/3.a.CreateScripts.png)
+
+Now let’s see the template of a script:
+
+```c#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Player : MonoBehaviour { 
+
+
+    // Use this for initialization
+    // Start is called when the game object is created, it's often used for initialization of variables.
+    void Start () {
+
+    }
+
+    // The functions inside of Update() will be called once per frame
+    // Games today could reach 60 frames per second, meaning Update() can be called for dozens of times per second.
+    void Update () {
+        
+    }
+}
+```
+
+A script inherits from the class MonoBehaviour, which is a blueprint for components to be attached to GameObjects.
+
+### Task 3.1. Scripts for Player Movement
+
+*Additional Notes for people who are not familiar with **object-oriented programming**:*
+
+When declaring variables, the access modifiers - - **Private and Public**, let the compiler know which classes should have access to the field:
+
+**private** - Only the current class will have access to the field or method.  
+**public** - Any class can refer to the field or call the method.
+
+How does these two reflect differently in Unity?
+
+If I create a public integer variable called *velocity* in the scripts, I can actually modify this variable in Unity to test different velocity (see the image below):
+
+```c#
+public int velocity; // Do not initialize the value.
+```
+![3.1.a.PrivateAndPublic](Images/3.1.a.PrivateAndPublic.png)
+
+Whereas private variables will only be accessible with the script. For testing purposes, you can declare a certain variables to see if they’re function well, but remember to set them to private for information security purpose.  
+
+---
+
+To enable the player to move, we are going to get the player input by GetKey and Apply force to the player’s RigidBody:
+
