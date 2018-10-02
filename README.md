@@ -1116,3 +1116,19 @@ Congrats! Now all the development part has finished!
 ---
 
 ## Task 8. Build The Game
+
+This task is plain and simple, let’s build the game we just created so that it’s playable:
+
+Click File >> Build Settings >> Build >> Choose a folder that you would like to store your game, and there you have it!:
+
+---
+
+## Acknowledgements
+
+Many thanks to NTUOSS and its supportive committee~
+
+Greatest love for all of you who come today~
+
+Yours,
+
+YH
