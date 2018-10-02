@@ -1,8 +1,8 @@
-
-
 # NTUOSS Unity Workshop
 
 ##### *made with love by [Yong Hao](https://github.com/HORACEYOUNG) for NTU Open Source Society*
+
+*Leave a star if you like this~*
 
 ![](Images/UnityTitleImage.png)
 
@@ -21,8 +21,8 @@ Feedback & Error Reports: We will send out the link for collecting feedback as u
 
 ***Disclaimer: This workshop is for educational purposes only. The artistic resources are retrieved from Nintendo Co., Ltd. and information regarding Unity concepts are retrieved from [Unity Manual](https://docs.unity3d.com/Manual/index.html). No prototype or outcome of any type is intended for commercial use.***
 
-Tip: Search this Document with UnityConcept: “Search Term” to look for explanation. (First Letter Capitalized)
-Eg. “UnityConcept: Asset”
+Tip: Search this Document with “UnityConcept: ‘Search Term’“ and “UnityDoc: ‘Search Term’” to look for explanation. (First Letter Capitalized)
+Eg. “UnityConcept: Asset” / “UnityDoc: GetKey”
 
 ---
 ### Prerequisites
@@ -350,8 +350,6 @@ void ApplyForceToPlayer()
     {
         Debug.Log("The play wants to walk"); // Log is useful for debugging
 
-        playerState = PlayerState.walking; // Change the players's state
-
         if (walkLeft)
         {
         playerRb.AddForce(Vector2.left * velocity.x); // Apply the force to the player
@@ -368,7 +366,23 @@ void ApplyForceToPlayer()
 
 The logic is very simple and plain: if the player wants to walk, we will know which direction the player wants to walk, and apply the force according to the direction. Because a Vector 2 contains both magnitude and direction (specified by positive and negative value) info, the player will move exactly how we want it to.
 
-And don’t forget to invoke both methods in the correct place: invoke CheckPlayerInput() insiDe ApplyForceToPlayer() and invoke ApplyForceToPlayer() in the FixedUpdate(), the final outcome should look like this:
+##### [UnityDoc: GetComponent](https://docs.unity3d.com/ScriptReference/Component.GetComponent.html
+
+> ```c#
+> public Component GetComponent(Type type);
+> ```
+>
+> Returns the component of Type `type` if the game object has one attached, null if it doesn't.
+>
+> E.g. 
+>
+> ```c#
+> RigidBody2D rb = GetComponent<RigidBody>();
+> ```
+>
+>
+
+And don’t forget to invoke both methods in the correct place: invoke CheckPlayerInput() inside ApplyForceToPlayer() and invoke ApplyForceToPlayer() in the FixedUpdate(), the final outcome should look like this:
 
 ```c#
 using System.Collections;
@@ -381,14 +395,14 @@ public class Player : MonoBehaviour
     private float horizontalVelocityLimit; // Set a limit to Player's maximum horizontal velocity
     private bool walk, walkLeft, walkRight, jump; // State Boolean variables to record the state of the player
 
-    private enum PlayerState // Enum is a set of state variables
+    public enum PlayerState // Enum is a set of state variables
     {
         idle,
         walking,
         jumping
     }
 
-    PlayerState playerState; // Player state to keep track of
+    public PlayerState playerState; // Player state to keep track of
 
     private Rigidbody2D playerRb;  //Store a reference to the Rigidbody2D component required to use 2D Physics.
 
@@ -398,6 +412,12 @@ public class Player : MonoBehaviour
         //Get and store a reference to the Rigidbody2D component so that we can access it.
         playerRb = GetComponent<Rigidbody2D>();
         playerState = PlayerState.idle;
+    }
+
+    void Update()
+    {
+        UpdatePlayerState(); // Update player State
+        UpdatePlayerAnimation(); // Because Animation is not related to Physics, update under Update()
     }
 
     //FixedUpdate is called at a fixed interval and is independent of frame rate. Put physics code here.
@@ -411,14 +431,11 @@ public class Player : MonoBehaviour
 
         Vector3 scale = transform.localScale; // Reference Player's scale
 
-
         CheckPlayerInput(); // Check the Player's input here
 
         if (walk)
         {
             Debug.Log("The play wants to walk"); // Log is useful for debugging
-
-            playerState = PlayerState.walking; // Change the players's state
 
             if (walkLeft)
             {
@@ -430,7 +447,16 @@ public class Player : MonoBehaviour
                 playerRb.AddForce(Vector2.right * velocity.x);
                 scale.x = 1;
             }
+
         }
+
+        if (jump)
+        {
+            Debug.Log("The player wants to jump");
+            Vector2 tempVelocity = playerRb.velocity; // Store the current velocity for we want the current horizontal velocity not to change
+            playerRb.velocity = new Vector2(tempVelocity.x, velocity.y); // Give the rigidbody an initial vertical velocity
+        }
+
 
         transform.localScale = scale; // Update Player's Tranform.scale Here
     }
@@ -450,6 +476,22 @@ public class Player : MonoBehaviour
 
         jump = input_space; // The player will jump is space is pressed
     }
+
+    void UpdatePlayerState()
+    {
+        if (playerRb.velocity.y != 0) // If the player has a vertical velocity, meaning the player is in the air
+        {
+            playerState = PlayerState.jumping; // Change the player's state
+        }
+        else if(playerRb.velocity.x != 0) // If the player has a horizontal velocity but no vertical, meaning the player is walking
+        {
+            playerState = PlayerState.walking;
+        }
+        else // Else the player is idle
+        {
+            playerState = PlayerState.idle;
+        }
+    }
 }
 ```
 
@@ -457,4 +499,369 @@ And don’t forget to set the velocity value in Unity, otherwise it will be 0 by
 
 ![3.1.b. SetVelocityValue](Images/3.1.b. SetVelocityValue.png)
 
-### Task 3.2. Camera Movement
+Let’s test out the game we just built by clicking on the play button at the top toolbar, now the play screen will be restricted  by the dimensions of the camera. （You can modify the aspects of the camera if you like to. ）
+
+![3.1.c.PlayMode](Images/3.1.c.PlayMode.png)
+
+Click Game >> CameraAspect >> Add new and specify the width & height you want your camera to be.
+
+![3.1.d.ChangeCameraAspect](Images/3.1.d.ChangeCameraAspect.png)
+
+Now your Mario can move freely as a tiny spirit~
+
+![3.1.e.PlayMode](Images/3.1.e.PlayMode.png)
+
+### Task 3.2. Player Jump
+
+Now you might have noticed that your Mario can walk, but it cannot jump as if it has no knees. If you remember what we have initialized a state for Mario’s jumping and we have player’s input (press space = jump), it’s actually pretty easy to enable it to jump~
+
+Recall from high school physics: If an object is given a vertical velocity upwards, it will move upwards with a decreasing vertical velocity due to the pull from gravity. What we are going to do next is to give our player a initial vertical velocity.
+
+##### [UnityDoc: Rigidbody.velocity](https://docs.unity3d.com/ScriptReference/Rigidbody2D.html)
+
+> The velocity vector of the rigidbody.
+
+Add the following below the if(walk) block:
+
+```c#
+if (jump)
+{
+    // Change the players's state to jumping
+    Debug.Log("The player wants to jump");
+    Vector2 tempVelocity = playerRb.velocity; 
+    // Store the current velocity for we want the current horizontal velocity not to change
+    playerRb.velocity = new Vector2(tempVelocity.x, velocity.y); 
+    // Give the rigidbody an initial vertical velocity
+}
+```
+
+When you test this in play mode, you’ll find that Mario does jump, but he did not come back. And if you leave him like this he might just reach the Mars. The reason is the gravity scale of Mario is 0, that makes the gravity applied on Mario equal to 0.
+
+##### [UnityDoc: Physics2D.gravity](https://docs.unity3d.com/ScriptReference/Physics2D-gravity.html)
+
+> ```c#
+> public static Vector2 Gravity
+> ```
+>
+> The gravity applied to all rigid bodies in the scene.
+>
+> Gravity can be turned off for an individual rigidBody using its [useGravity](https://docs.unity3d.com/ScriptReference/Rigidbody-useGravity.html) property.
+
+By default gravity is a 2D Vector with magnitude (0, -9.8) to simulate real world effects.
+
+Now Let’s simply set the gravity scale of Mario to 1 and you’ll notice that there is a gravity that pulls Mario down to earth.
+
+![3.2.a.GravityScale](Images/3.2.a.GravityScale.png)
+
+Often developing games make me wonder, are we just game objects in a enormous simulator, and the gravity we experience everyday is also oriented from that.
+
+### Task 3.3. Collision Detection
+
+Wow, what just happened? Our Mario travelled through the earth and disappeared! How did that happen?
+
+This is due to the lack of collision detection of our player. The game engine does not know what should happen when Mario interacts with the ground, so nothing happens,
+
+Unity provides a convenient way for collision detection, collider. For simplicity we’ll use BoxCollider2D.
+
+##### [UnityDoc: Collider](https://docs.unity3d.com/ScriptReference/Collider.html)
+
+> A base class of all colliders.
+
+By clicking Add Component >> BoxCollider2D, a BoxCollider2D is attached to the Game Object.
+
+![3.3.b.Collider](Images/3.3.b.Collider.png)
+
+If the object with the Collider needs to be moved during gameplay then you should also attach a Rigidbody component to the object. The Rigidbody can be set to be kinematic if you don't want the object to have physical interaction with other objects.
+
+### Task 3.4. Camera Movement
+
+You might have noticed that the scene is not moving with our character, that it is easy for the character to move out of our view. What is he doing? Is he grabbing a cup of coffee when we’re not watching? To see that, we need to modify our Camera so that it moves along with our character.
+
+The easiest way to do this is to drag the Main Camera under Player, so that the main camera becomes a child object of Player. Once an object becomes another’s child object, their relative position will not change.
+
+![3.3.a.ChildObject](Images/3.3.a.ChildObject.png)
+
+But the result is far from our satisfaction, its flexibility is totally lost as it moves wherever the player goes. What we want is to leave a little bit of space in the whole scene so that Mario have a little bit more space to move on Space
+
+So drag the camera out and unchain it from slavery of the Player and open the Camera Follow Script.
+
+Let’s analyze what effect we want to achieve first:
+
+We want the Camera to move forward once Mario exceeds the center oaf the camera. However, when Mario goes back, the camera won’t follow Mario that way. Then we need the horizontal distance between the player and the camera, and a function to smooth out the movement of camera.
+
+Let’s create a public variable to reference the player game object first:
+
+```c#
+public GameObject player; // Reference to the player game object
+```
+
+To smooth out the movement of camera, we will use a function called Mathf.SmoothDamp:
+
+##### [UnityDoc: Mathf.SmoothDamp](https://docs.unity3d.com/ScriptReference/Physics2D-gravity.html)
+
+> ```c#
+> public static float SmoothDamp(float current, float target, ref float currentVelocity, float smoothTime, float maxSpeed = Mathf.Infinity, float deltaTime = Time.deltaTime);
+> ```
+>
+> Gradually changes a value towards a desired goal over time.
+>
+> The value is smoothed by some spring-damper like function, which will never overshoot. The function can be used to smooth any kind of value, positions, colors, scalars.
+
+Basically what this function does is to smoothly change the value of **current**, to the value of **target** in approximately deltaTime.
+
+Now we create a function called UpdateCameraPosition():
+
+```c#
+void UpdateCameraPosition()
+{
+    float velocity = 0f; // Initialze a velocity for SmoothDamp, this value is not important.
+    Vector3 origin = transform.position; // Reference to the camera position;
+    Vector3 target = player.transform.position; // Reference to the player position
+    if (target.x - origin.x> 0f) // Whenever the player moves ahead of the camera
+    {
+        Debug.Log("Camera is moving");
+        float x = Mathf.SmoothDamp(origin.x, target.x, ref velocity, 0.001f); 
+        // Smooth the transition from the horizontal value of the camera to the horizontal value of the player
+        transform.position = new Vector3(x, transform.position.y, transform.position.z); // Update the transform
+    }
+}
+```
+
+The logic is whenever player passes through the center of the camera, the position of the camera will smoothly transited to the position of the player, making the camera follow the player. The finished script of the CameraFollow should look like this:
+
+```c#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class CameraFollow : MonoBehaviour {
+
+    public GameObject player; // Reference to the player game object
+
+
+	// Use this for initialization
+	void Start () {
+		
+	}
+	
+	// Update is called once per frame
+	void Update () {
+        UpdateCameraPosition(); // Invoke Here
+    }
+
+    void UpdateCameraPosition()
+    {
+        float velocity = 0f; // Initialze a velocity for SmoothDamp, this value is not important.
+        Vector3 origin = transform.position; // Reference to the camera position;
+        Vector3 target = player.transform.position; // Reference to the player position
+        if (target.x - origin.x != 0f) // Whenever the player moves out of the center of the camera
+        {
+            Debug.Log("Camera is moving");
+            float x = Mathf.SmoothDamp(origin.x, target.x, ref velocity, 0.001f); 
+            // Smooth the transition from the horizontal value of the camera to the horizontal value of the player
+            transform.position = new Vector3(x, transform.position.y, transform.position.z); // Update the transform
+        }
+    }
+}
+
+```
+
+
+---
+
+## Task 4. Animations and Audio Management
+
+### Task 4.1. Add Animations
+
+So far our Mario can walk, jump and collide with other objects, but it seems a little bit dull because there’s no animation and sound for the game. We’re going to add them for this chapter.
+
+Let’s navigate to Animations >> Player, we’ll find there are three types of animation available, idle, walk, and jump. They’re actually pretty simple (idle and jump only has one frame each, walk has 3). The transition of the animations are controlled by the state machine using Boolean values:
+
+![4.1.a.Animator](Images/4.1.a.Animator.png)
+
+By default, the state is idle, unless the Boolean value of isRunning and isJumping changes. We only need to activate one state at a time.
+
+##### [UnityDoc: Animator](https://docs.unity3d.com/ScriptReference/Collider.html)
+
+> Interface to control the Mecanim animation system.
+
+To add an animator to the player, click Add Component >> Animator and drag mario_animator to the controller to add reference to it.
+
+![4.1.a.AnimatorComponent](Images/4.1.a.AnimatorComponent.png)
+
+If you remember we have created a enum called PlayerState to keep track of the player’s state, you might be wondering what it is used for the player states. Now it’s come to use:
+
+```c#
+void UpdatePlayerAnimation()
+{
+    if (playerState == PlayerState.idle) // Check the state of the player
+    {
+        // Set the Boolean state value accordingly
+        GetComponent<Animator>().SetBool("isJumping", false); 
+        GetComponent<Animator>().SetBool("isRunning", false);
+    }
+
+    if (playerState == PlayerState.jumping)
+    {
+        GetComponent<Animator>().SetBool("isJumping", true);
+        GetComponent<Animator>().SetBool("isRunning", false);
+    }
+
+    if (playerState == PlayerState.walking)
+    {
+        GetComponent<Animator>().SetBool("isJumping", false);
+        GetComponent<Animator>().SetBool("isRunning", true);
+	}
+}	
+```
+
+And don’t forget to call it in Update()~
+
+### Task 4.2. Audio
+
+To add audio for this game, the easiest way to do is to add an Audio Source to the game object. We will use this for background music but not others since it could be hard to specify the trigger events for certain audios.
+
+##### [UnityDoc: Audio Source](https://docs.unity3d.com/ScriptReference/Collider.html)
+
+> The **Audio Source** plays back an [Audio Clip](https://docs.unity3d.com/Manual/class-AudioClip.html) in the **scene**
+> .
+
+What an Audio Source does is it receives the audio from AudioClip and controls when and where to play it. Let’s add the music to something that is not changeable, something like the Ground Long (Our ground), let’s navigate to it.
+
+In the inspector, let’s add the audio source to it by Add Component, and drag the Theme-Ringtone to the AudioClip.
+
+![4.2.a.BackgroundMusic](Images/4.2.a.BackgroundMusic.png)
+
+Then tick Play On Awake to play it when the Ground Long is awake (initialized in game), and Loop to continuously play the background theme.
+
+How do we add effects sound? It’s similar and I’m going to demonstrate adding one sound. Once you’ve learned one you’ve learned to add many other sounds to your game. Now let’s add the jump sound to the player whenever it jumps.
+
+Navigate to the Player game object, click Add Component >> Audio Source and drag smb_jump-super to the AudioClip, and remember to untick Play On Awake and Loop because we want to control when it plays.
+
+Now open the player script and add the following under if(jump):
+
+```c#
+AudioSource audioJump = GetComponent<AudioSource>(); // reference to the audiosource;
+audioJump.Play(); // Play the audio clip.
+```
+
+The Updated whole function body should look like this:
+
+```c#
+if (jump)
+{
+    Debug.Log("The player wants to jump");
+    AudioSource audioJump = GetComponent<AudioSource>(); // reference to the audiosource;
+    audioJump.Play(); // Play the audio clip.
+    Vector2 tempVelocity = playerRb.velocity; // Store the current velocity for we want the current horizontal velocity not to change
+    playerRb.velocity = new Vector2(tempVelocity.x, velocity.y); // Give the rigidbody an initial vertical velocity
+}
+```
+
+After this, whenever our Mario jumps, a sound will be played. Now our game looks a lot more alive and aural.
+
+## Task 5. Interaction with Question Blocks
+
+Now let’s get to some interactions between our player and the question block.
+
+Our game is still far from complete because other than walking and jumping, our player cannot do much else. Mario cannot interact with question blocks, there’re no enemies and nobody knows how to win this game. We will get our hands onto them One by One.
+
+### Task 5.1. Question Block Bouncing
+
+In the real Super Mario Gameplay, the question block would bounce a little bit and not ever again. We’ll achieve this by a a technique called RayCast2D.
+
+Let’s open QuestionBlock script and write the following:
+
+```c#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class QuestionBlock : MonoBehaviour {
+    private float bounceSpeed = 3f; // The speed by which you want the block to bounce
+    private float bounceHeight = 0.2f; // The height by which you want the block to bounce
+    private bool canBounce = true; // State Checking, a question block can only bounce once
+    private Vector3 originalPosition; // The original position of the question block, used to return to original position
+
+	// Use this for initialization
+	void Start () {
+        originalPosition = transform.position; // Initialize the original position
+	}
+	
+	// Update is called once per frame
+	void Update () {
+        
+    }
+
+    public void UpdateBounce()
+    {
+        if (canBounce) // Check is the block is eligible to jump
+        {
+            if(transform.position.y < originalPosition.y + bounceHeight)
+            {
+                transform.position += Vector3.up * Time.deltaTime * bounceSpeed; 
+                // Bounce the block up
+            }
+            else
+            {
+                canBounce = false; // When bounce is finished, disable the canBounce
+            }
+        }
+        else
+        {
+            if (transform.position.y > originalPosition.y)
+            {
+                transform.position -= Vector3.up * Time.deltaTime * bounceSpeed; 
+                // Bouce the block down
+            }
+        }
+    }
+
+}
+
+```
+
+We want to call UpdateBounce when Mario is contacted with the Question Block, how do we do that?
+
+This time we are going to use RaycastHit2D to cast a tiny ray on top of Mario’s head, and when that ray hits the question block, the UpdateBounce will be called so that our Question Block can jump.
+
+##### [UnityDoc: Mathf.SmoothDamp](https://docs.unity3d.com/ScriptReference/Physics2D.Raycast.html)
+
+> ```c#
+> public static RaycastHit2D Raycast(Vector2 origin, Vector2 direction, float distance = Mathf.Infinity, int layerMask = DefaultRaycastLayers, float minDepth = -Mathf.Infinity, float maxDepth = Mathf.Infinity);
+> ```
+>
+> What it does is to cast a invisible ray starting from origin, with the direction of Vector2 direction and a distance. If this ray is colliding with something, it will return a RaycastHit2D object that contains the information about the collision.
+
+Open Player script and add the following method:
+
+```c#
+void UpdateHitQuestionBlock(Vector3 pos)
+{
+    Vector2 rayOriginTop = new Vector2(pos.x, pos.y + 1.2f);
+
+    RaycastHit2D hitTop = Physics2D.Raycast(rayOriginTop, Vector2.up, velocity.y * Time.deltaTime);
+    if (hitTop.collider != null)
+    {
+        if (hitTop.collider.tag == "QuestionBlock")
+        {
+            hitTop.collider.GetComponent<QuestionBlock>().UpdateBounce();
+        }
+    }
+}
+```
+
+And invoke this under Update()
+
+```c#
+void Update()
+{
+    UpdatePlayerState(); // Update player State
+    UpdatePlayerAnimation(); // Because Animation is not related to Physics, update under Update()
+    UpdateHitQuestionBlock(transform.position);
+}
+```
+
+
+
+### Task 5.2. Question Block Interaction
