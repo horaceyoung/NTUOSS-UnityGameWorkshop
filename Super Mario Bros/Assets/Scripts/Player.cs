@@ -32,6 +32,7 @@ public class Player : MonoBehaviour
         UpdatePlayerState(); // Update player State
         UpdatePlayerAnimation(); // Because Animation is not related to Physics, update under Update()
         UpdateHitQuestionBlock(transform.position);
+        UpdatePlayerHitEnemy();
     }
 
     //FixedUpdate is called at a fixed interval and is independent of frame rate. Put physics code here.
@@ -123,6 +124,19 @@ public class Player : MonoBehaviour
                 hitTop.collider.GetComponent<QuestionBlock>().UpdateBounce();
             }
 
+        }
+    }
+
+    void UpdatePlayerHitEnemy()
+    {
+        Vector2 origin = new Vector2(transform.position.x, transform.position.y - 1.2f);
+        RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.down, velocity.y * Time.deltaTime);
+        if (hit.collider != null)
+        {
+            if(hit.collider.tag == "Enemy")
+            {
+                Destroy(hit.collider.gameObject);
+            }
         }
     }
 

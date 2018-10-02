@@ -666,7 +666,6 @@ public class CameraFollow : MonoBehaviour {
 
 ```
 
-
 ---
 
 ## Task 4. Animations and Audio Management
@@ -825,7 +824,7 @@ We want to call UpdateBounce when Mario is contacted with the Question Block, ho
 
 This time we are going to use RaycastHit2D to cast a tiny ray on top of Mario’s head, and when that ray hits the question block, the UpdateBounce will be called so that our Question Block can jump.
 
-##### [UnityDoc: Mathf.SmoothDamp](https://docs.unity3d.com/ScriptReference/Physics2D.Raycast.html)
+##### [UnityDoc: RayCast](https://docs.unity3d.com/ScriptReference/Physics2D.Raycast.html)
 
 > ```c#
 > public static RaycastHit2D Raycast(Vector2 origin, Vector2 direction, float distance = Mathf.Infinity, int layerMask = DefaultRaycastLayers, float minDepth = -Mathf.Infinity, float maxDepth = Mathf.Infinity);
@@ -865,3 +864,255 @@ void Update()
 
 
 ### Task 5.2. Question Block Interaction
+
+A real question block will be empty after a hit, and a coin (maybe other items like mushrooms) will appear. We will change the texture - or more accurately, the sprite of the question block;
+
+Add a sprite reference to the empty block, and drag the empty block sprite from the graphics folder and click apply to all prefabs:
+
+```c#
+public Sprite emptyBlock; // Reference to the empty block sprite
+```
+
+Then in the UpdateBounce() method, add the following:
+
+```c#
+GetComponent<Animator>().enabled = false;// Disable the animation
+GetComponent<SpriteRenderer>().sprite = emptyBlock; // Change the sprite
+```
+
+What these two lines basically do is firstly, disable the animation of the block, and then change the sprite of the question block to empty block.
+
+Let’s test the result, now the question block will become an empty block once hit:
+
+![5.2.a.EmptyBlock](Images/5.2.a.EmptyBlock.png)
+
+### Task 5.3. Get a Coin!
+
+We have gone through all of this hard work! Now it’s time to get us a little reward now! Once our Mario hit the question block, we will get a coin as our reward!
+
+We will use the Instantiate method to instantiate a prefab (refer to aforementioned concepts).
+
+As we have mentioned before, a prefab is like a blueprint for game objects. If you have one prefab, you can instantiate the prefab to as many game objects as you want.
+
+##### [UnityDoc: Object.Instantiate](https://docs.unity3d.com/ScriptReference/Object.Instantiate.html)
+
+> ```c#
+> public static Object Instantiate(Object original, Vector3 position, Quaternion rotation);
+> ```
+>
+> Clones the object `original` and returns the clone.
+>
+> This function makes a copy of an object in a similar way to the Duplicate command in the editor. If you are cloning a [GameObject](https://docs.unity3d.com/ScriptReference/GameObject.html) then you can also optionally specify its position and rotation (these default to the original GameObject's position and rotation otherwise). If you are cloning a [Component](https://docs.unity3d.com/ScriptReference/Component.html) then the GameObject it is attached to will also be cloned, again with an optional position and rotation.
+
+Let’s go to the QuestionBlock script and add the following variables:
+
+```c#
+public GameObject coin; // Refernce to the coin prefab
+private GameObject coinInstance; // The actual coin instantiated
+private Vector3 coinOriginalPosition; 
+private float coinHeight = 2f; // The height that the coins jumps
+private float coinSpeed= 6f; // The speed that the coin jumps
+```
+
+And create the following CoinBounce() method:
+
+```c#
+void CoinBounce()
+{
+    Vector3 coinPos = coinInstance.transform.position;
+    if (coinPos.y < coinOriginalPosition.y + coinHeight)
+    {
+    	coinPos += Vector3.up * coinSpeed * Time.deltaTime;
+    }
+    else
+    {
+        Destroy(coinInstance); // Destroy the coin once its bounced to the designated height
+    }
+    coinInstance.transform.position = coinPos; // Update position
+}
+```
+
+And invoke the method in UpdateBounce() (Because we want the coin to bounce once the block is hit):
+
+```c#
+public void UpdateBounce()
+{
+    GetComponent<Animator>().enabled = false;// Disable the animation
+    GetComponent<SpriteRenderer>().sprite = emptyBlock; // Change the sprite
+
+    CoinBounce();// iNVOKE HERE!!!
+
+    if (canBounce) // Check is the block is eligible to jump
+    {
+        if(transform.position.y < originalPosition.y + bounceHeight)
+        {
+        transform.position += Vector3.up * Time.deltaTime * bounceSpeed; // Bounce the block up
+    }
+    else
+    {
+    	canBounce = false; // When bounce is finished, disable the canBounce
+    }
+    }
+    else
+    {
+        if (transform.position.y > originalPosition.y)
+        {
+        transform.position -= Vector3.up * Time.deltaTime * bounceSpeed; // Bouce the block down
+        }
+    }
+}
+```
+
+Now congrats! You just received a coin for all your efforts!
+
+---
+
+## Task 6. Enemy AI (Optional)
+
+***(Whether the following sections are going to be conducted depending the actual workshop flow and time management)***
+
+For now, the difficulty level of our game is pathetically low, our Mario faces no challenge at all!
+
+Let add some enemies in our gameplay that could threaten the life of Mario.
+
+Drag an enemy to the gameplay and let’s rock;
+
+Open the EnemyAI script and add a constant velocity to it, and then enable it to destroy the player using the technique we have discussed before - RayCast:
+
+```c#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class EnemyAI : MonoBehaviour {
+
+    Rigidbody2D EnemyRb; // Reference to enemy's rigidBody
+    public float horizontalSpeed; // Enemy's speed
+    public AudioSource deathAudio;
+    public GameObject background;
+    private AudioSource backgroundAudio;
+    // Use this for initialization
+	void Start () {
+        EnemyRb = GetComponent<Rigidbody2D>(); // Initialize the enemy's rigidbody
+        deathAudio = GetComponent<AudioSource>();
+	}
+	
+	// Update is called once per frame
+	void Update () {
+        EnemyRb.velocity = new Vector2(horizontalSpeed, 0);
+        PlayerDieDetechtion();
+        // Every time a frame updates, set the Enemy's velocity to keep a constant velocity
+    }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+            horizontalSpeed = -horizontalSpeed; // Once the enemy collides with anything, reverse its direction 
+    }
+
+    void PlayerDieDetechtion()
+    {
+        Vector3 pos = transform.position;
+
+        Vector2 originLeft = new Vector2(pos.x - 0.7f, pos.y);
+        Vector2 originRight = new Vector2(pos.x + 0.7f, pos.y);
+
+        RaycastHit2D leftHit= Physics2D.Raycast(originLeft, Vector2.left, horizontalSpeed * Time.deltaTime);
+        RaycastHit2D rightHit = Physics2D.Raycast(originRight, Vector2.right, horizontalSpeed * Time.deltaTime);
+
+        if (leftHit.collider != null || rightHit.collider!= null)
+        {
+            RaycastHit2D hit;
+            if (leftHit.collider != null)
+            {
+                hit = leftHit;
+            }
+            else
+            {
+                hit = rightHit;
+            }
+            if (hit.collider.tag == "Player")
+            {
+                Destroy(hit.collider.gameObject);
+                deathAudio.Play();
+
+                backgroundAudio = background.GetComponent<AudioSource>();
+                backgroundAudio.Stop();
+            }
+
+        }
+    }
+}
+
+```
+The logic is to cast two rays to both the left and the right of the enemy. Once these rays collide with the player, the player object will be destroyed and the player death sound will be played.
+
+---
+
+## Task 7. Winning the Game
+
+Congratulations! You’re just one step away from finish!
+
+The last problem we are going to address is - There’s no way for us to win this game, that is, our Mario is trapped in our game forever.
+
+We are going to detect the collision between Mario and the castle to load a new scene - the winning scene - by using SceneManager.LoadScene:
+
+##### [UnityDoc: SceneManager.LoadScene](https://docs.unity3d.com/ScriptReference/SceneManagement.SceneManager.LoadScene.html)
+
+> ```c#
+> public static void LoadScene(string sceneName, SceneManagement.LoadSceneMode mode = LoadSceneMode.Single);
+> 
+> ```
+>
+> Loads the Scene by its name or index in Build Settings.
+
+Let’s first add a winning scene in asset/scenes:
+
+![](Images/7.a.WinningScene.png)
+
+It is empty by now, let’s not make it complicated and just drag an image inside so we know that our scene has changed:
+
+![7.b. AnImage](Images/7.b. AnImage.png)
+
+And do not forget to add the newly created scene to build list by clicking File >> Build Settings and drag the WinningScene to the Scenes In Build.
+
+The Castle script that should be attached to the castle game object should be like this:
+
+Note we add a new using - using UnityEngine.SceneManagement;
+
+```c#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.SceneManagement;
+using UnityEngine;
+
+public class Castle : MonoBehaviour {
+
+	// Use this for initialization
+	void Start () {
+		
+	}
+	
+	// Update is called once per frame
+	void Update () {
+		
+	}
+
+     void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.collider.tag == "Player")
+        {
+            Debug.Log("win");
+            SceneManager.LoadScene("WinningScene");
+        }   
+    }
+}
+
+```
+
+When the player collides with the castle, the winning scene will be loaded.
+
+Congrats! Now all the development part has finished!
+
+---
+
+## Task 8. Build The Game
