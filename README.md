@@ -293,7 +293,7 @@ There are other two types of methods to get keyboard input from the user:
 | Method Name | Description                                                  |
 | :---------- | ------------------------------------------------------------ |
 | GetKeyDown  | Returns true during the frame the user starts pressing down the key identified by name (Only for one frame). |
-| GetKey      | Returns true during the frame the user releases the key identified by name (Only for one frame). |
+| GetKeyUp    | Returns true during the frame the user releases the key identified by name (Only for one frame). |
 | GetKey      | Returns true while the user holds down the key identified by the key KeyCode enum parameter |
 
 Now let’s finish the method for receiving input:
