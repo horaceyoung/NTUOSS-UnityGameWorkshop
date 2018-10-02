@@ -129,7 +129,7 @@ public class Player : MonoBehaviour
 
     void UpdatePlayerHitEnemy()
     {
-        Vector2 origin = new Vector2(transform.position.x, transform.position.y - 1.2f);
+        Vector2 origin = new Vector2(transform.position.x, transform.position.y - 1.4f);
         RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.down, velocity.y * Time.deltaTime);
         if (hit.collider != null)
         {
