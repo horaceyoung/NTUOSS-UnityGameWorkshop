@@ -415,6 +415,8 @@ public class Player : MonoBehaviour
         //Get and store a reference to the Rigidbody2D component so that we can access it.
         playerRb = GetComponent<Rigidbody2D>();
         playerState = PlayerState.idle;
+        velocity.x = 5;
+        velocity.y = 5;
     }
 
     void Update()
