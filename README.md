@@ -1052,7 +1052,7 @@ Let’s first add a winning scene in asset/scenes:
 
 It is empty by now, let’s not make it complicated and just drag an image inside so we know that our scene has changed:
 
-![7.b. AnImage](Images/7.b. AnImage.png)
+![7.b. AnImage](Images/7.b.AnImage.png)
 
 And do not forget to add the newly created scene to build list by clicking File >> Build Settings and drag the WinningScene to the Scenes In Build.
 
