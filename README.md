@@ -21,8 +21,8 @@ Feedback & Error Reports: We will send out the link for collecting feedback as u
 
 ***Disclaimer: This workshop is for educational purposes only. The artistic resources are retrieved from Nintendo Co., Ltd. and information regarding Unity concepts are retrieved from [Unity Manual](https://docs.unity3d.com/Manual/index.html). No prototype or outcome of any type is intended for commercial use.***
 
-Tip: Search this Document with “UnityConcept: ‘Search Term’“ and “UnityDoc: ‘Search Term’” to look for explanation. (First Letter Capitalized)
-Eg. “UnityConcept: Asset” / “UnityDoc: GetKey”
+Tip: Search this Document with `UnityConcept: ‘Search Term’` and `UnityDoc: ‘Search Term’` to look for explanation. (First Letter Capitalized)
+Eg. `UnityConcept: Asset` / `UnityDoc: GetKey`
 
 ---
 ### Prerequisites
@@ -105,7 +105,7 @@ The Unity Editor features multiple tools that enable rapid editing and iteration
 
 ### [UnityConcept: Asset Package](https://docs.unity3d.com/Manual/AssetPackages.html)
 
-> **Unity Asset Packages** and items on the Unity **Asset Store** are supplied in packages, which are **collections of files and data from Unity Projects**, or elements of Projects, which **are compressed and stored in one file**, similar to zip files. Like zip files.
+> **Unity Asset Packages** and items on the Unity **Asset Store** are supplied in packages, which are **collections of files and data from Unity Projects**, or elements of Projects, which **are compressed and stored in one file**, similar to zip files.
 
 ​	For this Workshop, we will be using an online package called [MarioCloneAssets.unitypackage](https://github.com/HORACEYOUNG/NTUOSS-UnityWorkshop/blob/master/MarioCloneAssets.unitypackage) under the root directory of the [workshop repository](https://github.com/HORACEYOUNG/NTUOSS-UnityWorkshop).
 
@@ -361,6 +361,9 @@ void ApplyForceToPlayer()
         scale.x = 1;
         }
 	}
+
+    transform.localScale = scale; // Update Player's Tranform.scale Here
+
 }
 ```
 
@@ -416,8 +419,7 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        UpdatePlayerState(); // Update player State
-        UpdatePlayerAnimation(); // Because Animation is not related to Physics, update under Update()
+        
     }
 
     //FixedUpdate is called at a fixed interval and is independent of frame rate. Put physics code here.
@@ -450,14 +452,6 @@ public class Player : MonoBehaviour
 
         }
 
-        if (jump)
-        {
-            Debug.Log("The player wants to jump");
-            Vector2 tempVelocity = playerRb.velocity; // Store the current velocity for we want the current horizontal velocity not to change
-            playerRb.velocity = new Vector2(tempVelocity.x, velocity.y); // Give the rigidbody an initial vertical velocity
-        }
-
-
         transform.localScale = scale; // Update Player's Tranform.scale Here
     }
 
@@ -477,27 +471,12 @@ public class Player : MonoBehaviour
         jump = input_space; // The player will jump is space is pressed
     }
 
-    void UpdatePlayerState()
-    {
-        if (playerRb.velocity.y != 0) // If the player has a vertical velocity, meaning the player is in the air
-        {
-            playerState = PlayerState.jumping; // Change the player's state
-        }
-        else if(playerRb.velocity.x != 0) // If the player has a horizontal velocity but no vertical, meaning the player is walking
-        {
-            playerState = PlayerState.walking;
-        }
-        else // Else the player is idle
-        {
-            playerState = PlayerState.idle;
-        }
-    }
 }
 ```
 
 And don’t forget to set the velocity value in Unity, otherwise it will be 0 by default and the player won’t move.
 
-![3.1.b. SetVelocityValue](Images/3.1.b. SetVelocityValue.png)
+![3.1.b. SetVelocityValue](Images/3.1.b.SetVelocityValue.png)
 
 Let’s test out the game we just built by clicking on the play button at the top toolbar, now the play screen will be restricted  by the dimensions of the camera. （You can modify the aspects of the camera if you like to. ）
 
